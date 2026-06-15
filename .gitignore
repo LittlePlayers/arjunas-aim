@@ -1,0 +1,5 @@
+*.stackdump
+.DS_Store
+Thumbs.db
+_*.html
+*.png
