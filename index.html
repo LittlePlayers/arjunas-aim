@@ -190,23 +190,68 @@
     ctx.fillStyle="#79a847"; for(let x=0;x<W;x+=22) ctx.fillRect(x,GROUND,11,5);
   }
   function drawArcher(){
-    const x=ANCHOR.x, gy=GROUND;
-    // body
-    ctx.strokeStyle="#3a2a1a"; ctx.lineWidth=6; ctx.lineCap="round";
-    ctx.beginPath(); ctx.moveTo(x,gy); ctx.lineTo(x,gy-34); ctx.stroke();       // torso/legs
-    ctx.fillStyle="#caa06a"; ctx.beginPath(); ctx.arc(x,gy-44,9,0,7); ctx.fill(); // head
-    ctx.fillStyle="#23314d"; ctx.beginPath(); ctx.arc(x,gy-47,9,Math.PI,0); ctx.fill(); // hair
-    ctx.fillStyle="#1f9e6a"; ctx.beginPath(); ctx.ellipse(x-3,gy-56,2,6,-0.3,0,7); ctx.fill(); // feather
-    // bow at anchor, oriented to aim
+    const fx=ANCHOR.x, gy=GROUND, sx=fx-16, sy=ANCHOR.y;     // sx,sy = shoulder anchor
+    const SKIN="#c8814a", SKIN2="#a8662f", HAIR="#241a12", GOLD="#ffcf40", DHOTI="#2e9e72";
+    const bp=power*16;
+    const shx=ANCHOR.x-Math.cos(angle)*bp, shy=ANCHOR.y-Math.sin(angle)*bp;  // string nock (draw-hand)
+    ctx.lineCap="round"; ctx.lineJoin="round";
+
+    // quiver on the back
+    ctx.save(); ctx.translate(sx-9,sy+4); ctx.rotate(0.35);
+    ctx.strokeStyle="#8a4f1e"; ctx.lineWidth=8; ctx.beginPath(); ctx.moveTo(0,-8); ctx.lineTo(0,24); ctx.stroke();
+    ctx.lineWidth=2; ctx.strokeStyle="#b5651d";
+    for(let i=-1;i<=1;i++){ ctx.beginPath(); ctx.moveTo(i*3,-8); ctx.lineTo(i*3,-20); ctx.stroke();
+      ctx.fillStyle="#e23b2e"; ctx.beginPath(); ctx.moveTo(i*3,-20); ctx.lineTo(i*3-2,-15); ctx.lineTo(i*3+2,-15); ctx.fill(); }
+    ctx.restore();
+
+    // drawing (back) arm — connects to the string nock
+    ctx.strokeStyle=SKIN2; ctx.lineWidth=7; ctx.beginPath(); ctx.moveTo(sx-4,sy+2); ctx.lineTo(shx,shy); ctx.stroke();
+
+    // legs (warrior stance)
+    ctx.strokeStyle=SKIN; ctx.lineWidth=9;
+    ctx.beginPath(); ctx.moveTo(sx+1,gy-28); ctx.lineTo(sx-9,gy); ctx.stroke();    // back leg
+    ctx.beginPath(); ctx.moveTo(sx+7,gy-28); ctx.lineTo(sx+17,gy); ctx.stroke();   // front leg
+    // dhoti
+    ctx.fillStyle=DHOTI; ctx.fillRect(sx-7,gy-34,26,16);
+    ctx.fillStyle=GOLD; ctx.fillRect(sx-7,gy-22,26,4);
+
+    // muscular torso (broad shoulders -> waist)
+    ctx.fillStyle=SKIN; ctx.beginPath();
+    ctx.moveTo(sx-11,sy+2); ctx.lineTo(sx+15,sy+2); ctx.lineTo(sx+11,gy-32); ctx.lineTo(sx-5,gy-32); ctx.closePath(); ctx.fill();
+    // pecs + abs shading
+    ctx.strokeStyle=SKIN2; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.arc(sx-2,sy+9,5,0.1,Math.PI-0.1); ctx.arc(sx+9,sy+9,5,0.1,Math.PI-0.1); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(sx+3,sy+14); ctx.lineTo(sx+3,gy-34); ctx.stroke();
+    // janeu (sacred thread)
+    ctx.strokeStyle="rgba(255,255,255,.8)"; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(sx+13,sy+2); ctx.lineTo(sx-4,gy-32); ctx.stroke();
+
+    // neck + head
+    ctx.fillStyle=SKIN; ctx.fillRect(sx,sy-8,7,10);
+    const hx=sx+4, hy=sy-16;
+    ctx.beginPath(); ctx.arc(hx,hy,10,0,7); ctx.fill();
+    ctx.fillStyle=HAIR; ctx.beginPath(); ctx.arc(hx,hy-1,10,Math.PI*0.92,Math.PI*2.08); ctx.fill();
+    ctx.beginPath(); ctx.arc(hx-9,hy+1,4,0,7); ctx.fill();                          // side bun
+    ctx.fillStyle="#2a1500"; ctx.beginPath(); ctx.arc(hx+5,hy,1.6,0,7); ctx.fill(); // eye (facing target)
+    ctx.fillStyle=SKIN2; ctx.fillRect(hx+8,hy+1,3,2);                               // nose hint
+    // crown (mukut)
+    ctx.fillStyle=GOLD; ctx.fillRect(hx-9,hy-9,19,4);
+    ctx.beginPath(); ctx.moveTo(hx,hy-9); ctx.lineTo(hx-4,hy-16); ctx.lineTo(hx+4,hy-16); ctx.closePath(); ctx.fill();
+    ctx.fillStyle="#e23b2e"; ctx.beginPath(); ctx.arc(hx,hy-16,2,0,7); ctx.fill();
+    // peacock feather
+    ctx.fillStyle="#1f9e6a"; ctx.beginPath(); ctx.ellipse(hx-8,hy-15,2,7,-0.5,0,7); ctx.fill();
+    ctx.fillStyle="#2a6cf0"; ctx.beginPath(); ctx.arc(hx-11,hy-19,2.4,0,7); ctx.fill();
+
+    // front (bow) arm — straight from shoulder to the grip, with a bicep bulge
+    ctx.strokeStyle=SKIN; ctx.lineWidth=9; ctx.beginPath(); ctx.moveTo(sx+12,sy+2); ctx.lineTo(ANCHOR.x,ANCHOR.y); ctx.stroke();
+    ctx.fillStyle=SKIN2; ctx.beginPath(); ctx.arc(sx+15,sy+1,4,0,7); ctx.fill();
+
+    // bow + string (rotated to aim), held in the front hand
     ctx.save(); ctx.translate(ANCHOR.x,ANCHOR.y); ctx.rotate(angle);
-    ctx.strokeStyle="#7a4a18"; ctx.lineWidth=4;
-    ctx.beginPath(); ctx.arc(0,0,26,-1.25,1.25); ctx.stroke();                  // bow
-    const pull=power*16;
-    ctx.strokeStyle="#eee"; ctx.lineWidth=1.5;                                  // string
-    ctx.beginPath(); ctx.moveTo(0,-25); ctx.lineTo(-pull,0); ctx.lineTo(0,25); ctx.stroke();
-    if(!arrow){ ctx.strokeStyle="#b5651d"; ctx.lineWidth=2.5;                   // nocked arrow
-      ctx.beginPath(); ctx.moveTo(-pull,0); ctx.lineTo(20,0); ctx.stroke();
-      ctx.fillStyle="#aaa"; ctx.beginPath(); ctx.moveTo(20,0); ctx.lineTo(13,-4); ctx.lineTo(13,4); ctx.fill(); }
+    ctx.strokeStyle="#7a4a18"; ctx.lineWidth=5; ctx.beginPath(); ctx.arc(0,0,28,-1.3,1.3); ctx.stroke();
+    ctx.strokeStyle="#caa23a"; ctx.lineWidth=2; ctx.beginPath(); ctx.arc(0,0,28,-1.3,1.3); ctx.stroke();
+    ctx.strokeStyle="#eee"; ctx.lineWidth=1.5; ctx.beginPath(); ctx.moveTo(0,-27); ctx.lineTo(-bp,0); ctx.lineTo(0,27); ctx.stroke();
+    if(!arrow){ ctx.strokeStyle="#b5651d"; ctx.lineWidth=2.5; ctx.beginPath(); ctx.moveTo(-bp,0); ctx.lineTo(22,0); ctx.stroke();
+      ctx.fillStyle="#aaa"; ctx.beginPath(); ctx.moveTo(22,0); ctx.lineTo(15,-4); ctx.lineTo(15,4); ctx.fill(); }
     ctx.restore();
   }
   function drawTarget(){
